@@ -16,6 +16,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+using namespace std;
+using namespace cv;
+
 /* command line options */
 bool verbose = false;
 int camera = -1;
@@ -24,8 +27,8 @@ bool train = false; // Train histogram
 /* capture histogram */
 bool capture = false;
 
-using namespace std;
-using namespace cv;
+MatND savedHist; // saved histogram
+
 
 /** @brief load hsv histogram from file
  *
@@ -44,8 +47,34 @@ MatND loadHistogram()
 	}
 
 	return hist;
+}
+
+void detectPalm(Mat& frame){
+
+	Mat src; Mat hsv; Mat hue;
+
+	if (savedHist.rows == 0) {
+		savedHist = loadHistogram();
+	}
+
+	cvtColor( frame, hsv, COLOR_BGR2HSV );
+
+	int channels[] = { 0, 1 };
+	float h_range[] = { 0, 180 };
+	float s_range[] = { 0, 256 };
+	const float* ranges[] = { h_range, s_range };
+
+	/// Get Backprojection
+	MatND backproj;
+	calcBackProject( &hsv, 1, channels, savedHist, backproj, ranges, 1, true );
+
+	/// Draw the backproj
+	imshow( "BackProj", backproj );
+
 
 }
+
+
 
 /** @brief Capture histogram of a region and save
  * Majority of this is from opencv sample calcHist_demo.cpp
@@ -58,7 +87,7 @@ void captureHistogram(Mat& frame)
 
 	// Quantize the hue to 30 levels
 	// and the saturation to 32 levels
-	int hbins = 30, sbins = 32;
+	int hbins = 50, sbins = 60;
 	int histSize[] = {hbins, sbins};
 	// hue varies from 0 to 179, see cvtColor
 	float hranges[] = { 0, 180 };
@@ -74,8 +103,9 @@ void captureHistogram(Mat& frame)
 			true, // the histogram is uniform
 			false );
 
+	normalize( hist, hist, 0, 255, NORM_MINMAX, -1, Mat() );
 
-	cout << hist << endl;
+	if (verbose) cout << hist << endl;
 
 	FileStorage fs("palmHistogram.xml", FileStorage::WRITE);
 	fs << "hist" << hist;
@@ -88,8 +118,8 @@ void drawTrainROI(Mat& frame)
 {
 	Rect roiRect;
 	roiRect.x = frame.cols/3;
-	roiRect.y = frame.rows/3;
-	roiRect.height = frame.rows/3;
+	roiRect.y = frame.rows/3 - 50;
+	roiRect.height = frame.rows/3 + 100;
 	roiRect.width = frame.cols/3;
 
 	Mat roi(frame,roiRect);
@@ -133,7 +163,12 @@ int captureVideo(int& cam)
 			;
 		}
 
-		if (train) drawTrainROI(frame);
+		if (train) {
+			drawTrainROI(frame);
+		}else
+		{
+			detectPalm(frame);
+		}
 
 		imshow("Camera", frame);
 	}
@@ -145,6 +180,7 @@ void printusage()
 	cout << "usage : gesture [-v] [-c <camera number>] " << endl;
 	cout << "\t-v	Display verbose output. Used to output debug values to console" << endl;
 	cout << "\t-c	Specify camera 0 or 1. If there is only one cam it is usually 0. Any additional USB cams will have higher numbers" << endl;
+	cout << "\t-t	Train hsv palm histogram" << endl;
 }
 
 int main(int argc, char **argv) {
