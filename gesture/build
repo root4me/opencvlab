@@ -1,0 +1,2 @@
+g++ palm.cpp -o bin/palm `pkg-config --cflags --libs opencv`
+
