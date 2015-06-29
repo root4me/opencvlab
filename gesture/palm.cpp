@@ -26,8 +26,12 @@ bool train = false; // Train histogram
 
 /* capture histogram */
 bool capture = false;
-
 Mat savedHist; // saved histogram
+int channels[] = { 0, 1 };
+float hRange[] = { 0, 180 };
+float sRange[] = { 0, 256 };
+const float* ranges[] = { hRange, sRange };
+
 
 
 /** @brief load hsv histogram from file
@@ -49,17 +53,36 @@ Mat loadHistogram()
 	return hist;
 }
 
+void displayText(Mat& im, string text, int row)
+{
+
+	putText(im, text, Point(im.cols - 100,row * 20), FONT_HERSHEY_PLAIN , 1, Scalar(255,255,255),1,1);
+}
+
 /** @brief Isolates contours of the palm
  *
  */
 void isolatePalmContour(const Mat& frame){
 
 	vector<vector<Point> > contours;
-	findContours(frame, contours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	findContours(frame, contours, RETR_EXTERNAL , CV_CHAIN_APPROX_SIMPLE);
 
 	Mat afterContours;
 	afterContours = Mat::zeros(frame.size(), CV_8UC3);
-	drawContours(afterContours, contours, -1, Scalar(0, 180, 0), 1, 8);
+
+	for (int i=0; i< contours.size(); i++)
+	{
+		if (contourArea(contours[i]) > 1000)
+		{
+			drawContours(afterContours, contours, i, Scalar(0, 180, 0), 1, 8);
+		}
+	}
+
+	stringstream s_contours;
+	s_contours << "contours " << contours.size();
+
+	displayText(afterContours,s_contours.str(), 1);
+	displayText(afterContours,"fingers  0", 2);
 
 	imshow("Isolate Palm Contours", afterContours);
 }
@@ -74,14 +97,12 @@ Mat getBackProjection(Mat& frame){
 
 	cvtColor( frame, hsv, COLOR_BGR2HSV );
 
-	int channels[] = { 0, 1 };
-	float h_range[] = { 0, 180 };
-	float s_range[] = { 0, 256 };
-	const float* ranges[] = { h_range, s_range };
-
 	/// Get Backprojection
 	Mat backproj;
 	calcBackProject( &hsv, 1, channels, savedHist, backproj, ranges, 1, true );
+
+	//dilate( backproj, backproj, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+	//erode( backproj, backproj, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 	/// Draw the backproj
 	imshow( "After Back Projection", backproj );
@@ -104,14 +125,8 @@ void captureHistogram(Mat& frame)
 	// and the saturation to 32 levels
 	int hbins = 50, sbins = 60;
 	int histSize[] = {hbins, sbins};
-	// hue varies from 0 to 179, see cvtColor
-	float hranges[] = { 0, 180 };
-	// saturation varies from 0 (black-gray-white) to 255 (pure spectrum color)
-	float sranges[] = { 0, 256 };
-	const float* ranges[] = { hranges, sranges };
-	MatND hist;
-	// we compute the histogram from the 0-th and 1-st channels
-	int channels[] = {0, 1};
+
+	Mat hist;
 
 	calcHist( &hsv, 1, channels, Mat(), // do not use mask
 			hist, 2, histSize, ranges,
@@ -166,7 +181,9 @@ int captureVideo(int& cam)
 	for(;;)
 	{
 		char c = (char)waitKey(10);
-		if( c == 27 ) break;
+		if( c == 27 ){
+			break;
+		}
 		cap >> frame;
 
 		switch (c)
