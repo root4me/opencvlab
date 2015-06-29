@@ -27,16 +27,16 @@ bool train = false; // Train histogram
 /* capture histogram */
 bool capture = false;
 
-MatND savedHist; // saved histogram
+Mat savedHist; // saved histogram
 
 
 /** @brief load hsv histogram from file
  *
  */
-MatND loadHistogram()
+Mat loadHistogram()
 {
 
-	MatND hist;
+	Mat hist;
 	FileStorage storage("palmHistogram.xml", FileStorage::READ);
 	storage["hist"] >> hist;
 	storage.release();
@@ -49,7 +49,22 @@ MatND loadHistogram()
 	return hist;
 }
 
-void detectPalm(Mat& frame){
+/** @brief Isolates contours of the palm
+ *
+ */
+void isolatePalmContour(const Mat& frame){
+
+	vector<vector<Point> > contours;
+	findContours(frame, contours, RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
+	Mat afterContours;
+	afterContours = Mat::zeros(frame.size(), CV_8UC3);
+	drawContours(afterContours, contours, -1, Scalar(0, 180, 0), 1, 8);
+
+	imshow("Isolate Palm Contours", afterContours);
+}
+
+Mat getBackProjection(Mat& frame){
 
 	Mat src; Mat hsv; Mat hue;
 
@@ -65,13 +80,13 @@ void detectPalm(Mat& frame){
 	const float* ranges[] = { h_range, s_range };
 
 	/// Get Backprojection
-	MatND backproj;
+	Mat backproj;
 	calcBackProject( &hsv, 1, channels, savedHist, backproj, ranges, 1, true );
 
 	/// Draw the backproj
-	imshow( "BackProj", backproj );
+	imshow( "After Back Projection", backproj );
 
-
+	return backproj;
 }
 
 
@@ -167,7 +182,7 @@ int captureVideo(int& cam)
 			drawTrainROI(frame);
 		}else
 		{
-			detectPalm(frame);
+			isolatePalmContour(getBackProjection(frame));
 		}
 
 		imshow("Camera", frame);
