@@ -16,6 +16,7 @@
 
 using namespace std;
 
+
 uiUtils::uiUtils() {
 	// TODO Auto-generated constructor stub
 
@@ -53,7 +54,46 @@ Point uiUtils::rightPoint(vector<Point> list)
 	return sortedList[0];
 }
 
-void uiUtils::displaytext(Mat& frame,Point point, string text)
+void uiUtils::displaytext(Mat& frame,Point point, string text, int size)
 {
-	putText(frame, text, point, FONT_HERSHEY_PLAIN  , 1, Scalar(255,255,255),1,1);
+	putText(frame, text, point, FONT_HERSHEY_PLAIN  , size, Scalar(255,255,255),1,1);
+}
+
+Scalar uiUtils::color(uiUtils::colors c)
+{
+	switch(c)
+	{
+	case uiUtils::white :
+		return Scalar (255,255,255);
+	case uiUtils::red :
+		return Scalar (0,0,255);
+	case uiUtils::lime :
+		return Scalar (0,255,0);
+	case uiUtils::blue :
+		return Scalar (255,0,0);
+	case uiUtils::yellow :
+		return Scalar (0,255,255);
+	case uiUtils::cyan :
+		return Scalar (255,255,0);
+	case uiUtils::magenta :
+		return Scalar (255,0,255);
+	case uiUtils::silver :
+		return Scalar (192,192,192);
+	case uiUtils::gray :
+		return Scalar (128,128,128);
+	case uiUtils::maroon :
+		return Scalar (0,0,128);
+	case uiUtils::olive :
+		return Scalar (0,128,128);
+	case uiUtils::green :
+		return Scalar (0,128,0);
+	case uiUtils::purple :
+		return Scalar (128,0,128);
+	case uiUtils::teal :
+		return Scalar (128,128,0);
+	case uiUtils::navy :
+		return Scalar (128,0,0);
+	default:
+		return Scalar(0,0,0);
+	}
 }

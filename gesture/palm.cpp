@@ -36,24 +36,9 @@ float hRange[] = { 0, 180 };
 float sRange[] = { 0, 256 };
 const float* ranges[] = { hRange, sRange };
 
-/// Define colors
-Scalar White = Scalar (255,255,255);
-Scalar Red = Scalar (0,0,255);
-Scalar Lime = Scalar (0,255,0);
-Scalar Blue = Scalar (255,0,0);
-Scalar Yellow = Scalar (0,255,255);
-Scalar Cyan = Scalar (255,255,0);
-Scalar Magenta = Scalar (255,0,255);
-Scalar Silver = Scalar (192,192,192);
-Scalar Olive = Scalar (0,128,128);
-Scalar Green = Scalar (0,128,0);
-Scalar Purple = Scalar (128,0,128);
-Scalar Teal = Scalar (128,128,0);
-
 int fingers = 0;
 
-/** @brief load hsv histogram from file
- *
+/* Load hsv histogram from file
  */
 Mat loadHistogram()
 {
@@ -71,68 +56,16 @@ Mat loadHistogram()
 	return hist;
 }
 
-void displayText(Mat& im, string text, int row , int size = 1)
-{
-
-	putText(im, text, Point(im.cols - 100,row * 20), FONT_HERSHEY_PLAIN  , size, Scalar(255,255,255),1,1);
-}
-
-// helper function:
-// finds a cosine of angle between vectors
-// from pt0->pt1 and from pt0->pt2
-static double angle( Point pt1, Point pt2, Point pt0 )
+// pt0->pt1 and pt0->pt2
+double innerAngle( Point pt1, Point pt2, Point pt0 )
 {
 	double dx1 = pt1.x - pt0.x;
 	double dy1 = pt1.y - pt0.y;
 	double dx2 = pt2.x - pt0.x;
 	double dy2 = pt2.y - pt0.y;
 	return (acos((dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10)) * 180) / M_PI;
-
 }
 
-float innerAngle(float px1, float py1, float px2, float py2, float cx1, float cy1)
-{
-
-	float dist1 = sqrt(  (px1-cx1)*(px1-cx1) + (py1-cy1)*(py1-cy1) );
-	float dist2 = sqrt(  (px2-cx1)*(px2-cx1) + (py2-cy1)*(py2-cy1) );
-
-	float Ax, Ay;
-	float Bx, By;
-	float Cx, Cy;
-
-	//find closest point to C
-	//printf("dist = %lf %lf\n", dist1, dist2);
-
-	Cx = cx1;
-	Cy = cy1;
-	if(dist1 < dist2)
-	{
-		Bx = px1;
-		By = py1;
-		Ax = px2;
-		Ay = py2;
-
-
-	}else{
-		Bx = px2;
-		By = py2;
-		Ax = px1;
-		Ay = py1;
-	}
-
-
-	float Q1 = Cx - Ax;
-	float Q2 = Cy - Ay;
-	float P1 = Bx - Ax;
-	float P2 = By - Ay;
-
-
-	float A = acos( (P1*Q1 + P2*Q2) / ( sqrt(P1*P1+P2*P2) * sqrt(Q1*Q1+Q2*Q2) ) );
-
-	A = A*180/M_PI;
-
-	return A;
-}
 
 enum linedirection {
 	horizontal, vertical, angular
@@ -165,7 +98,8 @@ lineorientation lineslope(cv::Point p1, cv::Point p2) {
 
 	return o;
 }
-/** @brief Isolates contours of the palm
+
+/* Isolate palm contour and idetify fingers
  *
  */
 void isolatePalmContour(const Mat& frame){
@@ -189,9 +123,9 @@ void isolatePalmContour(const Mat& frame){
 	for (int i=0; i< contours.size(); i++)
 	{
 
-		if (contourArea(contours[i]) > 10000)
+		if (contourArea(contours[i]) > 30000)
 		{
-			circle(afterContours,uiUtils::leftPoint(contours[i]), cvRound(5), Purple, 5, LINE_4);
+			circle(afterContours,uiUtils::leftPoint(contours[i]), cvRound(5), uiUtils::color(uiUtils::white), 5, LINE_4);
 
 			uiUtils::displaytext(afterContours,uiUtils::leftPoint(contours[i]), "area : " + cppUtils::toString(contourArea(contours[i])));
 
@@ -211,7 +145,7 @@ void isolatePalmContour(const Mat& frame){
 			Moments mo = moments(contours[i]);
 			Point2f centroid = Point2f( mo.m10/mo.m00 , mo.m01/mo.m00 );
 
-			circle(afterContours,centroid, cvRound(2), Magenta, 1, LINE_4);
+			circle(afterContours,centroid, cvRound(2), uiUtils::color(uiUtils::magenta), 1, LINE_4);
 
 			//find the hull defect points and mark
 			convexityDefects(contours[i], hullInt, defects);
@@ -228,22 +162,22 @@ void isolatePalmContour(const Mat& frame){
 					triangle.push_back(Point (contours[i][defects[j][1]]));
 					triangle.push_back(Point (contours[i][defects[j][2]]));
 
-					circle(afterContours,Point (contours[i][defects[j][2]]), cvRound(2), Red, 1, LINE_4);
+					circle(afterContours,Point (contours[i][defects[j][2]]), cvRound(2), uiUtils::color(uiUtils::red), 1, LINE_4);
 
 					if (minEnclosingTriangle(triangle , triangle ) > 10000)
 					{
-						if (angle(triangle[2] , triangle[0], triangle[1]) < 85)
+						if (innerAngle(triangle[2] , triangle[0], triangle[1]) < 85)
 						{
 
 							triangles.push_back(triangle);
 
-							circle(afterContours,triangle[0], cvRound(4), White, 1, LINE_4);
-							circle(afterContours,triangle[2], cvRound(4), Lime, 1, LINE_4);
-							circle(afterContours,triangle[1], cvRound(5), Yellow, 1, LINE_4);
+							circle(afterContours,triangle[0], cvRound(4), uiUtils::color(uiUtils::white), 1, LINE_4);
+							circle(afterContours,triangle[2], cvRound(4), uiUtils::color(uiUtils::lime), 1, LINE_4);
+							circle(afterContours,triangle[1], cvRound(5), uiUtils::color(uiUtils::yellow), 1, LINE_4);
 
-							line(afterContours,Point (contours[i][defects[j][0]]),Point (contours[i][defects[j][1]]),Cyan,1, LINE_4);
-							line(afterContours,Point (contours[i][defects[j][0]]),Point (contours[i][defects[j][2]]),Green,1, LINE_4);
-							line(afterContours,Point (contours[i][defects[j][1]]),Point (contours[i][defects[j][2]]),Green,1, LINE_4);
+							line(afterContours,Point (contours[i][defects[j][0]]),Point (contours[i][defects[j][1]]),uiUtils::color(uiUtils::cyan),1, LINE_4);
+							line(afterContours,Point (contours[i][defects[j][0]]),Point (contours[i][defects[j][2]]),uiUtils::color(uiUtils::green),1, LINE_4);
+							line(afterContours,Point (contours[i][defects[j][1]]),Point (contours[i][defects[j][2]]),uiUtils::color(uiUtils::green),1, LINE_4);
 
 						}
 						else
@@ -253,11 +187,6 @@ void isolatePalmContour(const Mat& frame){
 					}
 				}
 
-			}
-
-			if (triangles.size() == 1)
-			{
-				cout << angle(triangles[0][2] , triangles[0][0], triangles[0][1])  << endl;
 			}
 		}
 	}
@@ -283,10 +212,9 @@ void isolatePalmContour(const Mat& frame){
 	f_count << "fingers " << fingers;
 	sf_count << "single " << largeAngleTriangles.size();
 
-	displayText(afterContours,s_contours.str(), 1);
-	displayText(afterContours,f_count.str(), 2);
-	displayText(afterContours,sf_count.str(), 3);
-
+	uiUtils::displaytext(afterContours,Point (afterContours.cols - 100, 10), s_contours.str());
+	uiUtils::displaytext(afterContours,Point (afterContours.cols - 100, 30), f_count.str());
+	uiUtils::displaytext(afterContours,Point (afterContours.cols - 100, 50), sf_count.str());
 
 	imshow("Isolate Palm Contours", afterContours);
 }
@@ -316,8 +244,8 @@ Mat getBackProjection(Mat& frame){
 
 
 
-/** @brief Capture histogram of a region and save
- * Majority of this is from opencv sample calcHist_demo.cpp
+/** Capture histogram of a region and save
+ * Majority of this is from opencv sample calcHist_demo.cpp followed by a save
  */
 void captureHistogram(Mat& frame)
 {
@@ -346,7 +274,7 @@ void captureHistogram(Mat& frame)
 	fs.release();
 }
 
-/** @brief Display a region of interest to capture palm histogram
+/** Display a region of interest to capture palm histogram
  */
 void drawTrainROI(Mat& frame)
 {
@@ -406,9 +334,11 @@ int captureVideo(int& cam)
 			isolatePalmContour(getBackProjection(frame));
 
 			stringstream f_count;
-			f_count << "-> " << fingers;
+			f_count << "->" << fingers;
 
-			displayText(frame,f_count.str(), 1, 2);
+			//displayText(frame,f_count.str(), 1, 2);
+
+			uiUtils::displaytext(frame,Point (frame.cols - 100, 30), f_count.str(),3);
 
 		}
 
