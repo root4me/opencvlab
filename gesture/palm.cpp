@@ -56,48 +56,6 @@ Mat loadHistogram()
 	return hist;
 }
 
-// pt0->pt1 and pt0->pt2
-double innerAngle( Point pt1, Point pt2, Point pt0 )
-{
-	double dx1 = pt1.x - pt0.x;
-	double dy1 = pt1.y - pt0.y;
-	double dx2 = pt2.x - pt0.x;
-	double dy2 = pt2.y - pt0.y;
-	return (acos((dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10)) * 180) / M_PI;
-}
-
-
-enum linedirection {
-	horizontal, vertical, angular
-};
-
-struct lineorientation {
-	linedirection d;
-	double angle;
-};
-
-double angleindegrees(cv::Point p1, cv::Point p2) {
-	double rad = atan2(fabs(p1.y - p2.y), fabs(p1.x - p2.x)); // radians
-	if (verbose) std::cout << "-> angleindegrees() - angle  " << p1 << " : " << p2 << " : " << (rad * 180) / M_PI << std::endl;
-	return (rad * 180) / M_PI; // convert to degree
-}
-
-lineorientation lineslope(cv::Point p1, cv::Point p2) {
-
-	double angle = angleindegrees(p1, p2);
-
-	lineorientation o;
-	o.angle = angle;
-
-	if (angle < 20)
-		o.d = horizontal;
-	else if (angle > 85 && angle < 95)
-		o.d = vertical;
-	else
-		o.d = angular;
-
-	return o;
-}
 
 /* Isolate palm contour and idetify fingers
  *
@@ -166,7 +124,7 @@ void isolatePalmContour(const Mat& frame){
 
 					if (minEnclosingTriangle(triangle , triangle ) > 10000)
 					{
-						if (innerAngle(triangle[2] , triangle[0], triangle[1]) < 85)
+						if (uiUtils::innerAngle(triangle[2] , triangle[0], triangle[1]) < 85)
 						{
 
 							triangles.push_back(triangle);
@@ -336,12 +294,8 @@ int captureVideo(int& cam)
 			stringstream f_count;
 			f_count << "->" << fingers;
 
-			//displayText(frame,f_count.str(), 1, 2);
-
 			uiUtils::displaytext(frame,Point (frame.cols - 100, 30), f_count.str(),3);
-
 		}
-
 		imshow("Camera", frame);
 	}
 	return 0;
