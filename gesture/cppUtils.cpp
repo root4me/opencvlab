@@ -48,3 +48,7 @@ string cppUtils::toString(size_t in)
 	return strs.str();
 }
 
+int cppUtils::toInt(char *in)
+{
+	return atoi(in);
+}

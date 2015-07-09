@@ -324,7 +324,7 @@ int main(int argc, char **argv) {
 		{
 		case 'c':
 			cam = optarg;
-			camera = atoi(cam); // convert to integer
+			camera = cppUtils::toInt(cam); // convert to integer
 			cout << "capture from camera " << camera << endl;
 			break;
 		case 'v':
