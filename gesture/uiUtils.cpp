@@ -17,8 +17,6 @@
 using namespace std;
 
 
-extern bool verbose;
-
 
 uiUtils::uiUtils() {
 	// TODO Auto-generated constructor stub
@@ -57,7 +55,7 @@ Point uiUtils::rightPoint(vector<Point> list)
 	return sortedList[0];
 }
 
-void uiUtils::displaytext(Mat& frame,Point point, string text, int size)
+void uiUtils::displayText(Mat& frame,Point point, string text, int size)
 {
 	putText(frame, text, point, FONT_HERSHEY_PLAIN  , size, Scalar(255,255,255),1,1);
 }

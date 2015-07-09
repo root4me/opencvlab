@@ -85,7 +85,7 @@ void isolatePalmContour(const Mat& frame){
 		{
 			circle(afterContours,uiUtils::leftPoint(contours[i]), cvRound(5), uiUtils::color(uiUtils::white), 5, LINE_4);
 
-			uiUtils::displaytext(afterContours,uiUtils::leftPoint(contours[i]), "area : " + cppUtils::toString(contourArea(contours[i])));
+			uiUtils::displayText(afterContours,uiUtils::leftPoint(contours[i]), "area : " + cppUtils::toString(contourArea(contours[i])));
 
 			fCount = 0;
 			cCount++;
@@ -170,9 +170,9 @@ void isolatePalmContour(const Mat& frame){
 	f_count << "fingers " << fingers;
 	sf_count << "single " << largeAngleTriangles.size();
 
-	uiUtils::displaytext(afterContours,Point (afterContours.cols - 100, 10), s_contours.str());
-	uiUtils::displaytext(afterContours,Point (afterContours.cols - 100, 30), f_count.str());
-	uiUtils::displaytext(afterContours,Point (afterContours.cols - 100, 50), sf_count.str());
+	uiUtils::displayText(afterContours,Point (afterContours.cols - 100, 10), "contours : " + cppUtils::toString(cCount));
+	uiUtils::displayText(afterContours,Point (afterContours.cols - 100, 30), "fingers : " + cppUtils::toString(fingers));
+	uiUtils::displayText(afterContours,Point (afterContours.cols - 100, 50), "single : " + cppUtils::toString(largeAngleTriangles.size()));
 
 	imshow("Isolate Palm Contours", afterContours);
 }
@@ -294,7 +294,7 @@ int captureVideo(int& cam)
 			stringstream f_count;
 			f_count << "->" << fingers;
 
-			uiUtils::displaytext(frame,Point (frame.cols - 100, 30), f_count.str(),3);
+			uiUtils::displayText(frame,Point (frame.cols - 100, 30), f_count.str(),3);
 		}
 		imshow("Camera", frame);
 	}

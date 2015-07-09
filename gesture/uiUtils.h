@@ -18,6 +18,8 @@
 using namespace std;
 using namespace cv;
 
+extern bool verbose;
+
 class uiUtils {
 
 public:
@@ -30,7 +32,7 @@ public:
 
 	static Point leftPoint(vector<Point> list);
 	static Point rightPoint(vector<Point> list);
-	static void displaytext(Mat& frame,Point point, string text, int size = 1);
+	static void displayText(Mat& frame,Point point, string text, int size = 1);
 	static Scalar color(colors c);
 	static double innerAngle( Point pt1, Point pt2, Point pt0 );
 };

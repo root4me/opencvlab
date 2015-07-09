@@ -40,3 +40,11 @@ string cppUtils::toString(int in)
 	strs << in;
 	return strs.str();
 }
+
+string cppUtils::toString(size_t in)
+{
+	std::ostringstream strs;
+	strs << in;
+	return strs.str();
+}
+

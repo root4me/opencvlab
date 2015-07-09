@@ -22,7 +22,7 @@ public:
 
 	static string toString(double in);
 	static string toString(int in);
-
+	static string toString(size_t in);
 };
 
 #endif /* CPPUTILS_H_ */
