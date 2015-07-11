@@ -16,8 +16,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../uiUtils.h"
-#include "../cppUtils.h"
+#include "uiUtils.h"
+#include "cppUtils.h"
 
 using namespace std;
 using namespace cv;
