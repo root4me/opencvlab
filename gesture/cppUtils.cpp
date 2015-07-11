@@ -41,6 +41,13 @@ string cppUtils::toString(int in)
 	return strs.str();
 }
 
+string cppUtils::toString(time_t in)
+{
+	std::ostringstream strs;
+	strs << in;
+	return strs.str();
+}
+
 string cppUtils::toString(size_t in)
 {
 	std::ostringstream strs;

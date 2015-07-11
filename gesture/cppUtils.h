@@ -23,6 +23,7 @@ public:
 	static string toString(double in);
 	static string toString(int in);
 	static string toString(size_t in);
+	static string toString(time_t in);
 
 	static int toInt(char* in);
 };
