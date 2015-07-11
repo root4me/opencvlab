@@ -3,6 +3,9 @@
  *
  *  Created on: Jul 11, 2015
  *      Author: harish
+ *
+ *
+ *  Take pictures from cam every 2 seconds and save
  */
 
 #include <opencv2/imgcodecs.hpp>

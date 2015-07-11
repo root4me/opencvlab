@@ -1,8 +1,10 @@
 /*
- * gesture.cpp
+ * palmhsv.cpp
  *
  *  Created on: Jun 21, 2015
  *      Author: harish
+ *
+ * Isolate palm using hsv histogram, back project and further processing to count fingers
  */
 
 #include <opencv2/imgcodecs.hpp>
@@ -44,7 +46,7 @@ Mat loadHistogram()
 {
 
 	Mat hist;
-	FileStorage storage("palmHistogram.xml", FileStorage::READ);
+	FileStorage storage("data/palmhsvhist.xml", FileStorage::READ);
 	storage["hist"] >> hist;
 	storage.release();
 
@@ -81,7 +83,7 @@ void isolatePalmContour(const Mat& frame){
 	for (int i=0; i< contours.size(); i++)
 	{
 
-		if (contourArea(contours[i]) > 30000)
+		if (contourArea(contours[i]) > 15000)
 		{
 			circle(afterContours,uiUtils::leftPoint(contours[i]), cvRound(5), uiUtils::color(uiUtils::white), 5, LINE_4);
 
@@ -122,7 +124,7 @@ void isolatePalmContour(const Mat& frame){
 
 					circle(afterContours,Point (contours[i][defects[j][2]]), cvRound(2), uiUtils::color(uiUtils::red), 1, LINE_4);
 
-					if (minEnclosingTriangle(triangle , triangle ) > 10000)
+					if (minEnclosingTriangle(triangle , triangle ) > 8000)
 					{
 						if (uiUtils::innerAngle(triangle[2] , triangle[0], triangle[1]) < 85)
 						{
@@ -227,7 +229,7 @@ void captureHistogram(Mat& frame)
 
 	if (verbose) cout << hist << endl;
 
-	FileStorage fs("palmHistogram.xml", FileStorage::WRITE);
+	FileStorage fs("data/palmhsvhist.xml", FileStorage::WRITE);
 	fs << "hist" << hist;
 	fs.release();
 }
@@ -314,7 +316,11 @@ int main(int argc, char **argv) {
 	int option;
 	char *cam;
 
-	if (argc ==1 ) printusage();
+	if (argc ==1 )
+	{
+		printusage();
+		return 0;
+	}
 
 	cout << argv[0] << endl;
 
