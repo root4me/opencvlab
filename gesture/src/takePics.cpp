@@ -43,8 +43,7 @@ void printusage()
 	cout << "usage : gesture [-v] [-c <camera number>] " << endl;
 	cout << "\t-v	Display verbose output. Used to output debug values to console" << endl;
 	cout << "\t-c	Specify camera 0 or 1. If there is only one cam it is usually 0. Any additional USB cams will have higher numbers" << endl;
-	cout << "\t-n	Number or snapts to take. Default is 10 is this parameter is not specified" << endl;
-	cout << "\t-t	Train hsv palm histogram" << endl;
+	cout << "\t-n	Number of snaps to take. Default is 10 is this parameter is not specified" << endl;
 }
 
 
