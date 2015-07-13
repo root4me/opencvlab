@@ -4,9 +4,8 @@
 cd positive
 for f in *.png; 
 do 
-	ffmpeg -i "$f" -vf scale=100:-1 "${f%}" -y
+	ffmpeg -i "$f" -vf scale=30:-1 "${f%}" -y
 done
-
 cd ..
 
 # scale down negative video to 640x width
@@ -21,14 +20,26 @@ counter=1
 for f in *.avi; 
 do 
 	echo "$counter"
-	ffmpeg -i "$f" -r 1/2 pic"$counter"%"$counter"d.png -y
+	ffmpeg -i "$f" -r 1/1 pic"$counter"%"$counter"d.png -y
 	counter=$((counter+1));
 done
-
 cd ..
 
 # negatives file list
 find ./negative -iname "*.png" > negatives.txt
+
+# generate test samples
+counter=1
+for f in positive/*.png; 
+do 
+	echo "$counter"
+	opencv_createsamples -vec samples/samples"$counter".vec -img "$f" -bg negatives.txt maxxangle 0.1 -maxyangle 0.1 -maxzangle 0.1 -w 30 -h 23
+	counter=$((counter+1));
+done
+
+python mergevec.py -v samples -o samples.vec
+
+opencv_traincascade -data classifier -vec samples.vec -bg negatives.txt -numStages 20 -minHitRate 0.999 -maxFalseAlarmRate 0.5 -numPos 1000 -numNeg 600 -w 30 -h 23 -mode ALL -precalcValBufSize 1024 -precalcIdxBufSize 1024
 
 
 ####opencv_createsamples -info ./samples/info.dat -img ./positive/positive.png -bg ./negatives.txt maxxangle 0.1 -maxyangle 0.1 -maxzangle 0.1
@@ -38,15 +49,12 @@ find ./negative -iname "*.png" > negatives.txt
 
 # opencv_createsamples -bgcolor 0 -bgthresh 0 -maxxangle 1.1  -maxyangle 1.1 maxzangle 0.5 -maxidev 40 -w 80 -h 40 -img ./positive_images/test1436675381.png -bg tmp -vec samples/test1436675381.png.vec -num 37
 
-#opencv_createsamples -info ./samples/info.dat -vec samples.vec
+# opencv_createsamples -info ./samples/info.dat -vec samples.vec
 
-#opencv_createsamples -info ./samples/info.dat -img ./positive/positive.png -bg ./negatives.txt maxxangle 0.1 -maxyangle 0.1 -maxzangle 0.1 -w 100 -h 75
+# opencv_createsamples -info ./samples/info.dat -img ./positive/positive.png -bg ./negatives.txt maxxangle 0.1 -maxyangle 0.1 -maxzangle 0.1 -w 100 -h 75
 
-#opencv_traincascade -data classifier -vec samples.vec -bg negatives.txt -numStages 2 -minHitRate 0.999 -maxFalseAlarmRate 0.5 -numPos 392 -numNeg 392 -w 100 -h 75 -mode ALL -precalcValBufSize 1024 -precalcIdxBufSize 1024
+# opencv_traincascade -data classifier -vec samples.vec -bg negatives.txt -numStages 2 -minHitRate 0.999 -maxFalseAlarmRate 0.5 -numPos 392 -numNeg 392 -w 100 -h 75 -mode ALL -precalcValBufSize 1024 -precalcIdxBufSize 1024
 
 
-opencv_createsamples -vec samples/samples1.vec -img positive/positive1.png -bg negatives.txt maxxangle 0.1 -maxyangle 0.1 -maxzangle 0.1 -w 100 -h 75
+# opencv_traincascade -data classifier -vec samples.vec -bg negatives.txt -numStages 20 -minHitRate 0.999 -maxFalseAlarmRate 0.5 -numPos 1000 -numNeg 600 -w 30 -h 23 -mode ALL -precalcValBufSize 2048 -precalcIdxBufSize 2048
 
-python mergevec.py -v samples -o samples.vec
-
-opencv_traincascade -data classifier -vec samples.vec -bg negatives.txt -numStages 2 -minHitRate 0.999 -maxFalseAlarmRate 0.5 -numPos 1000 -numNeg 300 -w 100 -h 75 -mode ALL -precalcValBufSize 1024 -precalcIdxBufSize 1024
