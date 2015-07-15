@@ -59,6 +59,15 @@ int findPalm(char *image, char *cascadexml)
 	return 0;
 }
 
+void printusage()
+{
+	cout << "usage : gesture [-v] [-c <camera number>] " << endl;
+	cout << "\t-v	Display verbose output. Used to output debug values to console" << endl;
+	//cout << "\t-c	Specify camera 0 or 1. If there is only one cam it is usually 0. Any additional USB cams will have higher numbers" << endl;
+	cout << "\t-h	haar cascade classifier xml" << endl;
+	cout << "\t-i	Image file" << endl;
+}
+
 int main(int argc, char **argv) {
 
 	int option;
@@ -67,17 +76,17 @@ int main(int argc, char **argv) {
 
 	if (argc ==1 )
 	{
-		//printusage();
+		printusage();
 		return 0;
 	}
 
 	cout << argv[0] << endl;
 
-	while ((option = getopt (argc, argv, "c:vi:")) != -1)
+	while ((option = getopt (argc, argv, "h:vi:")) != -1)
 	{
 		switch (option)
 		{
-		case 'c':
+		case 'h':
 			cascade = optarg;
 			break;
 		case 'v':
@@ -87,7 +96,7 @@ int main(int argc, char **argv) {
 			image = optarg;
 			break;
 		default:
-			//printusage();
+			printusage();
 			return 1;
 		}
 	}
