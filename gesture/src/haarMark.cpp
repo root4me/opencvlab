@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fstream>
 
 #include "uiUtils.h"
 #include "cppUtils.h"
@@ -28,7 +29,8 @@ using namespace cv;
 
 /* command line options */
 bool verbose = false;
-char* inputImage;
+//char* inputImage = NULL;
+char* outFileName = NULL;
 
 const string winName = "Input Image";
 
@@ -39,45 +41,67 @@ bool selectObject = false;
 Point origin;
 Rect selection;
 
+void insertActionText()
+{
+	uiUtils::displayText(frame,Point (10,10),"Mouse to select .. space bar to save selection to file",1);
+}
+
 static void onMouse( int event, int x, int y, int, void* )
 {
 
-    if( selectObject )
-    {
-        selection.x = MIN(x, origin.x);
-        selection.y = MIN(y, origin.y);
-        selection.width = std::abs(x - origin.x);
-        selection.height = std::abs(y - origin.y);
+	if( selectObject )
+	{
+		selection.x = MIN(x, origin.x);
+		selection.y = MIN(y, origin.y);
+		selection.width = std::abs(x - origin.x);
+		selection.height = std::abs(y - origin.y);
 
-        selection &= Rect(0, 0, frame.cols, frame.rows);
-    }
+		selection &= Rect(0, 0, frame.cols, frame.rows);
+	}
 
-    switch( event )
-    {
-    case EVENT_LBUTTONDOWN:
-        origin = Point(x,y);
-        selection = Rect(x,y,0,0);
-        selectObject = true;
-        break;
-    case EVENT_LBUTTONUP:
+	switch( event )
+	{
+	case EVENT_LBUTTONDOWN:
+		origin = Point(x,y);
+		selection = Rect(x,y,0,0);
+		selectObject = true;
+		break;
+	case EVENT_LBUTTONUP:
 
-        cout << selectObject << endl;
-        cout << selection.width << endl;
-        cout << selection.height << endl;
+		cout << "select object : " << selectObject << endl;
+		cout << "width : " << selection.width << endl;
+		cout << "height : " << selection.height << endl;
 
-        if(selectObject && selection.width > 0 && selection.height > 0 )
-        {
-    		frame = imread(imageName,1);
-            rectangle(frame,selection,uiUtils::color(uiUtils::green),2);
-            imshow("Input Image", frame);
-        }
+		//if(selectObject && selection.width > 0 && selection.height > 0 )
+		//{
+		frame = imread(imageName,1);
+		uiUtils::displayText(frame,Point (10,10),"..space bar to save selection to file ...any key to skip to next image",1);
+		uiUtils::displayText(frame,Point (10,30),"..mouse to reselect ...esc to quit",1);
+		rectangle(frame,selection,uiUtils::color(uiUtils::white),1);
+		imshow("Input Image", frame);
+		//}
 
-        selectObject = false;
-        break;
-    }
+		selectObject = false;
+		break;
+	}
 
 }
 
+void saveSelection()
+{
+	if (selection.width > 0 && selection.height > 0)
+	{
+		cout << ".. saving the region of interest :  "  << imageName << " 1 " << selection.x << ' ' << selection.y << ' ' << selection.width << ' ' << selection.height << endl;
+
+		ofstream outFile (outFileName, ios::out | ios::app );
+		if (outFile.is_open())
+		{
+			outFile << imageName << " 1 " << selection.x << ' ' << selection.y << ' ' << selection.width << ' ' << selection.height << endl;
+			outFile.close();
+		}
+		else cout << ".. can not open file !" << endl;
+	}
+}
 
 int displayImages(char *folder)
 {
@@ -85,8 +109,8 @@ int displayImages(char *folder)
 
 	vector<String> images;
 
-    namedWindow( winName, WINDOW_AUTOSIZE );
-    setMouseCallback( winName, onMouse, 0 );
+	namedWindow( winName, WINDOW_AUTOSIZE );
+	setMouseCallback( winName, onMouse, 0 );
 
 
 	glob((string)folder + "/*.png",images, false);
@@ -94,11 +118,9 @@ int displayImages(char *folder)
 	for (size_t i =0; i < images.size() ; i++)
 	{
 		frame = imread(images[i],1);
+		insertActionText();
 		imshow(winName, frame);
 		imageName = images[i];
-
-		cout << selectObject << endl;
-		cout << selection.width << endl;
 
 		char c = (char)waitKey(0);
 		if( c == 27 ){
@@ -106,7 +128,7 @@ int displayImages(char *folder)
 		}
 		else if (c == ' ')
 		{
-			cout << "save points" << endl;
+			saveSelection();
 		}
 	}
 
@@ -135,7 +157,7 @@ int main(int argc, char **argv) {
 
 	cout << argv[0] << endl;
 
-	while ((option = getopt (argc, argv, "vi:")) != -1)
+	while ((option = getopt (argc, argv, "vi:o:")) != -1)
 	{
 		switch (option)
 		{
@@ -145,10 +167,18 @@ int main(int argc, char **argv) {
 		case 'i':
 			imageFolder = optarg;
 			break;
+		case 'o':
+			outFileName = optarg;
+			break;
 		default:
 			printusage();
 			return 1;
 		}
+	}
+
+	if (outFileName == NULL)
+	{
+		outFileName = (char *)"temp.txt";
 	}
 
 	return displayImages(imageFolder);

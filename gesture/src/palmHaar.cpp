@@ -59,6 +59,46 @@ int findPalm(char *image, char *cascadexml)
 	return 0;
 }
 
+int captureVideo(int& cam, char *cascadexml)
+{
+	VideoCapture cap(cam);
+	Mat frame;
+
+	palmCascade.load(cascadexml);
+
+	vector<Rect> palms;
+	Mat frame_gray;
+
+	if(!cap.isOpened())
+	{
+		cout << "problem !" << endl;
+		return -1;
+	}
+
+	namedWindow("Camera",1);
+	for(;;)
+	{
+		char c = (char)waitKey(10);
+		if( c == 27 ){
+			break;
+		}
+		cap >> frame;
+
+		cvtColor( frame, frame_gray, CV_BGR2GRAY );
+		equalizeHist( frame_gray, frame_gray );
+
+		palmCascade.detectMultiScale( frame_gray, palms, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+
+		for( size_t i = 0; i < palms.size(); i++ )
+		{
+			rectangle(frame,palms[i],uiUtils::color(uiUtils::green),2);
+		}
+
+		imshow("Camera", frame);
+	}
+	return 0;
+}
+
 void printusage()
 {
 	cout << "usage : gesture [-v] [-c <camera number>] " << endl;
@@ -101,5 +141,9 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	return findPalm(image, cascade);
+	//return findPalm(image, cascade);
+	int cam = 1;
+
+	return captureVideo(cam,cascade);
+
 }
