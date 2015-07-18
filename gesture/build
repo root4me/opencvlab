@@ -1,2 +1,3 @@
 g++ src/uiUtils.cpp src/cppUtils.cpp src/palmHsv.cpp -o bin/palmhsv `pkg-config --cflags --libs opencv`
 g++ src/uiUtils.cpp src/cppUtils.cpp src/takePics.cpp -o bin/takepics `pkg-config --cflags --libs opencv`
+g++ src/uiUtils.cpp src/cppUtils.cpp src/palmHaar.cpp -o bin/palmhaar `pkg-config --cflags --libs opencv`
