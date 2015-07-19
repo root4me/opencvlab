@@ -29,7 +29,7 @@ bool verbose = false;
 char* outFileName = NULL;
 char* inputFolder = NULL;
 char* negativeFolder = NULL;
-char* positiveFolder = (char*)"data/positive";
+char* positiveFolder = NULL;
 
 const string winName = "Review Image";
 
@@ -200,6 +200,7 @@ void printusage()
 	cout << "usage : haarmark [-v] {-i <input folder>} " << endl;
 	cout << "\t-v	Display verbose output. Used to output debug values to console" << endl;
 	cout << "\t-i	input file folder (this is where the images to be processed must reside)" << endl;
+	cout << "\t-p	folder were positive files are stored" << endl;
 	cout << "\t-n	folder were negative files are stored" << endl;
 	cout << "\t-o	output info file name (this file will contain the positive file name with the coordinates of the selected region on interest)" << endl;
 	cout << "example : haarmark -i data/sample -o data/positive.info  -n data/negative" << endl;
@@ -215,7 +216,7 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 
-	while ((option = getopt (argc, argv, "vi:o:n:")) != -1)
+	while ((option = getopt (argc, argv, "vi:o:n:p:")) != -1)
 	{
 		switch (option)
 		{
@@ -228,6 +229,9 @@ int main(int argc, char **argv) {
 		case 'o':
 			outFileName = optarg;
 			break;
+		case 'p':
+			positiveFolder = optarg;
+			break;
 		case 'n':
 			negativeFolder = optarg;
 			break;
@@ -237,7 +241,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (outFileName == NULL || inputFolder == NULL || negativeFolder == NULL)
+	if (outFileName == NULL || inputFolder == NULL || negativeFolder == NULL || positiveFolder == NULL)
 	{
 		printusage();
 		return 1;
