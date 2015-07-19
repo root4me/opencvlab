@@ -6,7 +6,8 @@ echo $1
 
 if [[ $# == 0 ]]
 then
-	echo "parameter : file name with out extension (.mp4) is assumed"	
+	echo "usage : . ./mp4topng.sh sample/07182015_1"	
+	echo "extension (.mp4) is assumed"
 else
 	ffmpeg -i $1.mp4 -r 1/1 $1%d.png
 	for f in $1*.png;  
