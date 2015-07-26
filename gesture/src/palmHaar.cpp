@@ -29,11 +29,11 @@ using namespace cv;
 bool verbose = false;
 char* inputImage;
 
-CascadeClassifier palmCascade;
 
 int findPalm(char *image, char *cascadexml)
 {
 	cout << image << endl;
+	CascadeClassifier palmCascade;
 
 	palmCascade.load(cascadexml);
 
@@ -63,6 +63,7 @@ int captureVideo(int& cam, char *cascadexml)
 {
 	VideoCapture cap(cam);
 	Mat frame;
+	CascadeClassifier palmCascade;
 
 	palmCascade.load(cascadexml);
 
